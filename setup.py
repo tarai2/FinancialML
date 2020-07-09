@@ -8,7 +8,9 @@ setup(
         "numpy",
         "pandas",
         "tensorflow",
-        "numba"
+        "numba",
+        "pytest",
+        "pytest-mock"
     ]
     
     # extras_require =
