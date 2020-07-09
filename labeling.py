@@ -143,12 +143,12 @@ def integratedReturn(events, midPrice, theta_ver):
         midPrice (pd.DF or Series with DatetimeIndex):
         theta_ver (timedelta): threshold of vertical barrier
     """
-    assert "M8" in events.dtype.str, "events must be DatetimeIndex or Series contains Datetime."
+    assert "M8" in events.dtype.str, "events must be DatetimeIndex."
     assert "M8" in midPrice.index.dtype.str, "midPrice must have DatetimeIndex."
     _midPrice = midPrice.sort_index().reset_index().values
     _midPrice[:,0] = midPrice.index.values.astype(float)/1e9
     _midPrice = _midPrice.astype(float) # [N,2]
-    _events = events.values.astype(float)/1e9 # [n,]
+    _events = events.values.astype(float)/1e9  # [n,]
     ret = __integratedReturn(_events, _midPrice, theta_ver.total_seconds())
     result = pd.DataFrame({
         "t0" : pd.to_datetime((_events*1e9)).round("ms").values,
