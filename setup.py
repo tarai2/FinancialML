@@ -3,8 +3,7 @@ from setuptools import setup
 setup(
     name="FinancialML",
     version="0.0.1",
-    install_requires = 
-    [
+    install_requires=[
         "numpy",
         "pandas",
         "tensorflow",
@@ -12,7 +11,6 @@ setup(
         "pytest",
         "pytest-mock"
     ]
-    
     # extras_require =
     # {
     #     "develop": ["dev-packageA", "dev-packageB"]

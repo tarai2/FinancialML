@@ -1,6 +1,7 @@
 import requests
 # from FinancialML.metrics import sample
 
+
 def sample():
     try:
         # ここを Mock したい
