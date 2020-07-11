@@ -48,8 +48,7 @@ def get_volbar(market_activity, threshold, isBase=True):
 
 
 def cusum_filter(raw_series, theta, mean_func="exp", window=0.5):
-    """
-    対称CUSUM Filter. 系列St(raw_series)の平均乖離の累積値がtheta以上になったらsignal.
+    """ 対称CUSUM Filter. 系列St(raw_series)の平均乖離の累積値がtheta以上になったらsignal.
     Args:
         raw_series (pd.Series indexed by time): 部分定常時系列. (e.g. price)
         theta (numeric): イベント発生の閾値
@@ -78,20 +77,26 @@ def __cusum_filter(dS: np.array, theta: float):
     return [events_p, events_n]
 
 
-
 def fisher_exact_test(series, eff_pval=1, window=60):
-    """ fisher検定によるトレンド検出シグナル.
+    """　Fisher検定によるトレンド検出シグナル
     Args:
-        series(pd.Series): 時系列 with DatetimeIndex
-        eff_pval(float): 実効P値[%]
-        window(int): lookbackのながさ
+        series (pd.Series): DatetinmeIndexつき原系列
+        eff_pval (int, optional): 実効P値(0<.<1). Defaults to 1.
+        window (int, optional): lookbackの長さ. Defaults to 60.
+
+    Returns:
+        pd.DataFrame: 変化点時刻,検出時刻,方向のdataframe
     """
+
     df_effPval = pd.read_csv(os.path.dirname(__file__)+"/fisher_effPval.csv")
     assert eff_pval in df_effPval.q.unique() and window in df_effPval.W.unique(),\
         "eff_pval or window is invalid these values must be included in fisher_effPval.csv"
     time_change, time_signal, direction =\
-        _fisher_exact_test_bulk(series.values,
-        df_effPval.query("W==@window and q==@eff_pval").theta_p.iloc[0], window)
+        _fisher_exact_test_bulk(
+            series.values,
+            df_effPval.query("W==@window and q==@eff_pval").theta_p.iloc[0],
+            window
+        )
     data = pd.DataFrame({
         "change_point": series.index[time_change[direction != 0].astype(int)],
         "signal": series.index[time_signal[direction != 0].astype(int)],
@@ -102,7 +107,8 @@ def fisher_exact_test(series, eff_pval=1, window=60):
 
 @numba.jit(nopython=True)
 def _fisher_exact_test_bulk(series, pval, window):
-    """ 時系列処理 """
+    """ 時系列全てについてfisher検定を行う
+    """
     time_change = np.zeros_like(series)
     time_signal = np.zeros_like(series)
     direction = np.zeros_like(series)
@@ -116,7 +122,9 @@ def _fisher_exact_test_bulk(series, pval, window):
 
 
 logsumVec = np.array(
-    [0] + [np.log(np.arange(1, k+1)).sum() for k in np.arange(1, 1000)])  # log(k!)
+    [0] + [np.log(np.arange(1, k+1)).sum() for k in np.arange(1, 1000)])
+
+
 @numba.jit(nopython=True)
 def _fisher_exact_test_main(series: np.array):
     """ fisher検定のmain処理
@@ -172,7 +180,7 @@ def _fisher_exact_test_main(series: np.array):
 def _get_first_signal(signal_time, lookforward):
     flags = np.zeros_like(signal_time)
     last_signal = 0
-    for i,signal in enumerate(signal_time):
+    for i, signal in enumerate(signal_time):
         if last_signal + lookforward < signal:
             flags[i] = 1
             last_signal = signal
@@ -180,6 +188,14 @@ def _get_first_signal(signal_time, lookforward):
 
 
 def get_first_signal(signal_time, lookforward):
+    """ 予測ホライズン内で重複するシグナルを削除する
+    Args:
+        signal_time (DatetimeIndex): シグナルイベント時刻
+        lookforward (type): 予測ホライズン[sec]
+
+    Returns:
+        [ndarray]: 
+    """
     flags = _get_first_signal(
         signal_time.values.astype(float)/1e9, lookforward
     )
