@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from scipy.special import erfinv
 
 
 def neutralize_series(target, by, proportion=1.0):
@@ -26,3 +27,16 @@ def neutralize_series(target, by, proportion=1.0):
         neutralized_target.reshape(-1,), index=target.index
     )
     return neutralized_target
+
+
+def rankgauss(target):
+    """ targetをrankgauss化
+    Args:
+        target (pd.Series):
+    Returns:
+        [pd.Series]:
+    """
+    ranking = target.rank()
+    ranking_pm1 = 2 * (ranking / (ranking.max()+1) - 0.5)
+    rankgaussed_series = erfinv(ranking_pm1)
+    return rankgaussed_series
