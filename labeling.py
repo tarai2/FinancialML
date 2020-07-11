@@ -37,7 +37,7 @@ def tripleBarrier(events, midPrice,
     result = pd.DataFrame({
         "t0": pd.to_datetime((_events*1e9)).round("ms").values,
         "t1": pd.to_datetime((t1*1e9)).round("ms").values,
-        "ret: ret
+        "ret": ret
     })
     result.t1.replace(dt.date(1970, 1, 1), pd.NaT, inplace=True)
     result.loc[result.t1.isna(), "ret"] = np.nan

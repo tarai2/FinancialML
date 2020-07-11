@@ -16,8 +16,8 @@ def purge(data, k=10):
     temp_time = data.t0.min()
     purged_folds = []
     for i in range(k):
-        temp_fold
-        = data.iloc[kfold_row*i: kfold_row*(i+1)].query("@temp_time <= t0")
+        temp_fold =\
+             data.iloc[kfold_row*i: kfold_row*(i+1)].query("@temp_time <= t0")
         if temp_fold.shape[0] > 0:
             purged_folds.append(temp_fold)
         temp_time = temp_fold.t1.max()

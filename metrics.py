@@ -23,18 +23,22 @@ def drawDown(pnl: np.array) -> np.array:
 
 
 def aftermath(midprice, signal, lookforward):
-    aftermath = np.concatenate
-    (
+    aftermath = np.concatenate(
         [
             pd.merge_asof(
                 pd.DataFrame(index=signal+datetime.timedelta(seconds=n)),
                 midprice.to_frame(),
-                left_index=True, right_index=True, direction='forward').values
+                left_index=True,
+                right_index=True,
+                direction='forward').values
             for n in range(lookforward)
-        ], axis=1
+        ],
+        axis=1
     )
     aftermath = aftermath - aftermath[:, 0].reshape(-1, 1)
 
     return pd.DataFrame(
         aftermath,
-        columns=[n for n in range(lookforward)], index=signal)
+        columns=[n for n in range(lookforward)],
+        index=signal
+    )
