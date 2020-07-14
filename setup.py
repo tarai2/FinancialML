@@ -1,27 +1,22 @@
+import json
+from glob import glob
+from os.path import basename, dirname
+from os.path import splitext
+
 from setuptools import setup
+from setuptools import find_packages
+
+import financialml
+
+
+def _requires_from_file(filename):
+    return open(filename).read().splitlines()
+
 
 setup(
     name="financialml",
-    version="0.0.1",
-    install_requires=[
-        "numpy",
-        "pandas",
-        "tensorflow",
-        "numba",
-        "pytest",
-        "pytest-mock"
-    ]
-    # extras_require =
-    # {
-    #     "develop": ["dev-packageA", "dev-packageB"]
-    # },
-
-    # entry_points =
-    # {
-    #     "console_scripts" :
-    #     [
-    #         "foo = package_name.module_name:func_name",
-    #         "foo_dev = package_name.module_name:func_name [develop]"
-    #     ]
-    # }
+    version=financialml.__version__,
+    packages=['financialml'],  # import可能な名前空間を指定
+    package_dir={'financialml': 'financialml'},  # 名前空間とディレクトリsrcの対応
+    install_requires=_requires_from_file('requirements.txt'),
 )

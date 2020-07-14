@@ -46,8 +46,8 @@ class Backtester:
         askPrices = book.loc[:, book.columns.str.contains("askPrice")].resample(
             "1s").last().shift().fillna(method="ffill").fillna(method="ffill", axis=1)
         # indexの積集合を作り,そこにjoinすることで配列サイズを統一する
-        idx = (limitBid.index & limitAsk.index & bestBid.index &
-               bestAsk.index & bidVol.index & askVol.index)
+        idx = (limitBid.index & limitAsk.index & bestBid.index
+               & bestAsk.index & bidVol.index & askVol.index)
         idx = pd.DataFrame(index=idx)
         self.idx = idx
         print(idx.index[0], " ~ ", idx.index[-1])

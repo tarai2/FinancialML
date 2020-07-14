@@ -1,0 +1,6 @@
+numpy
+pandas
+tensorflow
+numba
+pytest
+pytest-mock

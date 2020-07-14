@@ -15,6 +15,8 @@ def tripleBarrier(events, midPrice,
         theta_hor (float): threshold of uppper/lower barrier
         theta_ver (timedelta): threshold of vertical barrier
         barrier_type (list): multiple factor of each barriers ...[upper,lower,vertical]
+    Return:
+        pd.DataFrame: [start_date, end_date, return]
     """
     assert "M8" in events.dtype.str,\
            "events must be DatetimeIndex or Series contains Datetime."
@@ -83,11 +85,12 @@ def __tripleBarrier(events, midPrice, theta_ver, theta_hor, barrier_type):
 
 
 def sampleUniqness(events, time_interval):
-    """
-    サンプルの平均独自性(0<.<1)を計算
+    """ サンプルの平均独自性(0<.<1)を計算
     Args:
         events (Series or DataTimeindex): sampling bar t
         time_interval (pd.DF): 各リターン区間iの[始点,終点]
+    Returns:
+        pd.DataFrame: [start_date, end_date, uniqness]
     """
     assert "M8" in events.values.dtype.str,\
         "events must be DatetimeIndex or Series of Datetime"
@@ -97,7 +100,8 @@ def sampleUniqness(events, time_interval):
     itv = time_interval.values.astype(float)/1e9
     mean_uniqness = __sampleUniqness(idx, itv)
     mean_uniqness = (time_interval).join(
-        pd.DataFrame(mean_uniqness, columns=["uniqness"]))
+        pd.DataFrame(mean_uniqness, columns=["uniqness"])
+    )
     return mean_uniqness
 
 

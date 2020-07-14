@@ -4,10 +4,10 @@ from scipy.special import erfinv
 
 
 def neutralize_series(target, by, proportion=1.0):
-    """ 線形回帰成分を控除して直交化する
+    """ 線形回帰成分を控除してtargetをbyに対して直交化する
     Args:
-        target ([pd.Series]): 直交化対象の系列
-        by ([pd.Series]): 直交化の際の横軸
+        target (pd.Series): 直交化対象の系列
+        by (pd.Series): 直交化の際の横軸
         proportion (float, optional): 直交化の強さ. Defaults to 1.0.
 
     Returns:
@@ -30,7 +30,7 @@ def neutralize_series(target, by, proportion=1.0):
 
 
 def rankgauss(target):
-    """ targetをrankgauss化
+    """ 特徴量target(離散,連続)をrankgauss化
     Args:
         target (pd.Series):
     Returns:

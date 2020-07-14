@@ -1,8 +1,10 @@
 import requests
-from finacialml.metrics import *
-from finacialml.bar import *
-from finacialml.cv import *
-from finacialml.labeling import *
+
+from financialml.metrics import *
+from financialml.sampling import *
+from financialml.cv import *
+from financialml.labeling import *
+from financialml.preprocessing import *
 
 
 def sample():
