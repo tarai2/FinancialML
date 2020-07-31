@@ -24,7 +24,7 @@ def drawDown(pnl: np.array) -> np.array:
     return DD  # ndarray
 
 
-def aftermath(midprice, signal, lookforward):
+def getAftermath(midprice, signal, lookforward):
     """ midpriceのSeriesからsignalのAftermathを計算
     Args:
         midprice (pd.Series):

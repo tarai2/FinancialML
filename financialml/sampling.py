@@ -4,7 +4,7 @@ import numba
 import os
 
 
-def get_tickinbbar(market_activity, initial_T=10):
+def getTickInbbar(market_activity, initial_T=10):
     """ 約定価格の価格変化の方向の偏りからbarを作成
     Args:
         market_activity (pd.DF):
@@ -32,7 +32,7 @@ def get_tickinbbar(market_activity, initial_T=10):
     return dP.index[bar]
 
 
-def get_volbar(market_activity, threshold, isBase=True):
+def getVolbar(market_activity, threshold, isBase=True):
     """ ボリュームバーもしくはドルバーを作成.(BASE/TERM)
         * volume bar...約定量が一定量を超えた場合にサンプリング.偏りは考えない.
     """
@@ -47,7 +47,7 @@ def get_volbar(market_activity, threshold, isBase=True):
     return bar
 
 
-def cusum_filter(raw_series, theta, mean_func="exp", window=0.5):
+def cusumFilter(raw_series, theta, mean_func="exp", window=0.5):
     """ 対称CUSUM Filter. 系列St(raw_series)の平均乖離の累積値がtheta以上になったらsignal.
     Args:
         raw_series (pd.Series indexed by time): 部分定常時系列. (e.g. price)
@@ -77,7 +77,7 @@ def __cusum_filter(dS: np.array, theta: float):
     return [events_p, events_n]
 
 
-def fisher_exact_test(series, eff_pval=1, window=60):
+def getFisherSignal(series, eff_pval=1, window=60):
     """　Fisher検定によるトレンド検出シグナル
     Args:
         series (pd.Series): DatetinmeIndexつき原系列
@@ -188,7 +188,7 @@ def _get_first_signal(signal_time, lookforward):
     return flags
 
 
-def get_first_signal(signal_time, lookforward):
+def getFirstSignal(signal_time, lookforward):
     """ 予測ホライズン内で重複するシグナルを削除する
     Args:
         signal_time (DatetimeIndex): シグナルイベント時刻

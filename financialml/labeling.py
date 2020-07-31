@@ -4,9 +4,9 @@ import pandas as pd
 import numba
 
 
-def tripleBarrier(events, midPrice,
-                  theta_ver=dt.timedelta(seconds=60), theta_hor=100,
-                  barrier_type=[1, 1, 1]):
+def getTripleBarrier(events, midPrice,
+                     theta_ver=dt.timedelta(seconds=60), theta_hor=100,
+                     barrier_type=[1, 1, 1]):
     """
     tripleBarrier法によるシグナルイベントt0のラベリング.
     Args:
@@ -84,7 +84,7 @@ def __tripleBarrier(events, midPrice, theta_ver, theta_hor, barrier_type):
     return events, t1, ret
 
 
-def sampleUniqness(events, time_interval):
+def getSampleUniqness(events, time_interval):
     """ サンプルの平均独自性(0<.<1)を計算
     Args:
         events (Series or DataTimeindex): sampling bar t
@@ -159,8 +159,8 @@ def __sampleUniqness(time_index, time_interval):
     return uniqness / n_b
 
 
-def integratedReturn(events, midPrice, theta_ver):
-    """ 時間で積分されたリターンを返す.
+def getIntegratedReturn(events, midPrice, theta_ver):
+    """ eventからtheta_verまでの時間で積分されたリターンを返す.
     Args:
         events (Series or DatetimeIndex): sampled event timestamps.
         midPrice (pd.DF or Series with DatetimeIndex):

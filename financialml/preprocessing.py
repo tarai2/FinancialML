@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.special import erfinv
 
 
-def neutralize_series(target, by, proportion=1.0):
+def neutralizeSeries(target, by, proportion=1.0):
     """ 線形回帰成分を控除してtargetをbyに対して直交化する
     Args:
         target (pd.Series): 直交化対象の系列
@@ -29,7 +29,7 @@ def neutralize_series(target, by, proportion=1.0):
     return neutralized_target
 
 
-def rankgauss(target):
+def applyRankGauss(target):
     """ 特徴量target(離散,連続)をrankgauss化
     Args:
         target (pd.Series):

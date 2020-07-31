@@ -5,7 +5,7 @@ import numba
 from typing import List
 
 
-def purge(data, k=10):
+def purgeDataset(data, k=10):
     """ リターンの重複を許さずにデータセットを分割
     Args:
         data (pd.DF): [int| t0,t1,ret,weight]
