@@ -6,10 +6,12 @@ from typing import List
 
 
 def purgeDataset(data, k=10):
-    """ リターンの重複を許さずにデータセットを分割
+    """ リターンの重複を許さずにデータセットをk分割
     Args:
         data (pd.DF): [int| t0,t1,ret,weight]
         k (int):
+    Returns:
+        list of pd.DataFrame: k個のDataFrame
     """
     N_row = data.shape[0]
     kfold_row = int(N_row / k)

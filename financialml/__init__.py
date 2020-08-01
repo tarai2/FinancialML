@@ -7,3 +7,4 @@ from . import labeling
 from . import metrics
 from . import preprocessing
 from . import sampling
+from . import FeatureImportance
