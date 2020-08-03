@@ -76,7 +76,7 @@ def clusterKMeansTop(corr, maxNumClusters=None, n_init=10):
         corr2, clusters2, silh2 = clusterKMeansTop(  # recursive call
             corrTmp, maxNumClusters, n_init
         )
-        corrNew, clustersNew, silhNew = makeNewOutputs(
+        corrNew, clustersNew, silhNew = _makeNewOutputs(
             corr, {i: clusters[i] for i in clusters.keys() if i not in redoClusters}, clusters2
         )
         newTstatMean = np.mean(
@@ -91,14 +91,8 @@ def clusterKMeansTop(corr, maxNumClusters=None, n_init=10):
             return corrNew, corrNew, clustersNew, silhNew
 
 
-def makeNewOutputs(corr, clusters, clusters2):
+def _makeNewOutputs(corr, clusters, clusters2):
     """ clustersとclusters2を結合して新たにcorrとsilhスコアを計算して返す
-    Args:
-        corr ([type]): [description]
-        clusters ([type]): [description]
-        clusters2 ([type]): [description]
-    Returns:
-        corrNew, clustersNew, silhNew
     """
     clustersNew = {}
     for i in clusters.keys():
