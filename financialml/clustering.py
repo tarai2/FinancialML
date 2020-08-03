@@ -88,7 +88,7 @@ def clusterKMeansTop(corr, maxNumClusters=None, n_init=10):
             return corr1, clusters, silh
         else:
             # quality improved, then return new one.
-            return corrNew, corrNew, clustersNew, silhNew
+            return corrNew, clustersNew, silhNew
 
 
 def _makeNewOutputs(corr, clusters, clusters2):
