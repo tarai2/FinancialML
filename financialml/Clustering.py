@@ -45,8 +45,8 @@ def clusterKMeansBase(corrMatrix, maxNumClusters=10, n_init=10):
 
 
 def clusterKMeansTop(corr, maxNumClusters=None, n_init=10):
-    """ silhouetteスコアが悪いクラスタについて再度クラスタリングを繰り返す.
-    3番目の問題; クラスタ毎の精度の不均一性を緩和している.
+    """ silhouetteスコアが悪いクラスタについて再度クラスタリングを繰り返すことで、
+        クラスタ毎の精度の不均一性(3番目の課題)を緩和している.
     Args:
         corr (pd.DataFrame): Featureの相関行列
         maxNumClusters (int, optional): 最大のクラスタ数
