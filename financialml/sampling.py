@@ -193,7 +193,6 @@ def getFirstSignal(signal_time, lookforward):
     Args:
         signal_time (DatetimeIndex): シグナルイベント時刻
         lookforward (type): 予測ホライズン[sec]
-
     Returns:
         DatetimeIndex: 重複が除かれたシグナル
     """

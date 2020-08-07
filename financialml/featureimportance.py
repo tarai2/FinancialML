@@ -31,7 +31,6 @@ def calculateMDI(X, y, clf=None):
         X (pd.DataFrame): feature
         y (pd.Series): label
         clf (estimator, optional): sklearn's classifier, that have .estimators_, and .feature_importance_.
-
     Returns:
         pd.DataFrame: each feature importance's mean and std.dev
     """
@@ -60,7 +59,6 @@ def calculateMDA(X, y, nSplit=10, clf=None, scoring="NegAL"):
         X (pd.DataFrame): feature
         y (pd.Series): label
         nSplit (int, optional): # of cv splits.
-
     Returns:
         pd.DataFrame: decrease of scoring metric.
     """
@@ -141,7 +139,6 @@ def calculateClusteredMDA(X, y, clusters, nSplit=10, scoring="NegAL", clf=None):
         y (pd.Series): label
         nSplit (int, optional): # of cv splits.
         clf (classifier): model that have fit() and predict_proba()
-
     Returns:
         pd.DataFrame: decrease of scoring metric at each clusters.
     """

@@ -9,7 +9,6 @@ def neutralizeSeries(target, by, proportion=1.0):
         target (pd.Series): 直交化対象の系列
         by (pd.Series): 直交化の際の横軸
         proportion (float, optional): 直交化の強さ. Defaults to 1.0.
-
     Returns:
         [pd.Series]: 直交化された系列
     """
