@@ -2,6 +2,8 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import numba
+import warnings
+from .conversion import *
 
 
 def getTripleBarrier(events, midPrice,
@@ -212,3 +214,162 @@ def __integratedReturn(events, midPrice, theta_ver):
                 _price_last = -1
                 break
     return ret
+
+
+
+def getFirstSignal(signal_df, horizon):
+    """ horizon秒を期限に重複するsignalを除く
+    Args:
+        signal_df (pd.DataFrame): [label, t0, t1]のdf. labelはU,N,D.
+        horizon (float): signalの賞味期限[sec].
+    Returns:
+        uniq_signal (pd.DataFrame): 
+    """
+    assert isinstance(signal_df, pd.DataFrame)
+    label_col = signal_df.columns[signal_df.columns.str.contains("label")]
+    assert label_col.shape[0]==1, "signal_df dataframe have multiple or no label in column."
+
+    label_name = label_col[0]
+    _label = np.argmax(get_und_dummies(signal_df[label_name]).values, axis=1) - 1
+    _t0 = signal_df.t0.values.astype(float) /1e9
+    _t1 = signal_df.t1.values.astype(float) /1e9
+
+    _label, _t0, _t1, n_duplicates = __getFirstSignal(_label, _t0, _t1, horizon)
+
+    _t0 = pd.to_datetime(_t0*1e9).round("ms")
+    _t1 = pd.to_datetime(_t1*1e9).round("ms")
+    uniq_signal = pd.DataFrame(
+        {"t0": _t0, "t1": _t1, label_name: _label, "duplicates": n_duplicates}
+    )
+    uniq_signal[label_name] = uniq_signal[f"{label_name}"].replace(-1,"D").replace(+1,"U").replace(0,"N")
+    return uniq_signal
+
+
+@numba.jit(nopython=True)
+def __getUniqueSignal(label, t0, t1):
+    # label:-1,0,1のndarray, t0,t1: timestamp, extend: bool
+    n_duplicates = np.zeros(label.shape[0])
+    I = len(label)
+    for i in range(I):  # 全signal iについて
+        
+        if label[i] == 0:
+            # Nsignalならpass
+            continue
+            
+        for j in range(i+1, I):  # 後に出た signal j (> i)について
+            if t1[i] < t0[j]:
+                # 後のsignalがhorizonの外で発生 => 当初のt1でOK
+                t1[i] = t1[i]
+                break
+            else:
+                # 後のsignalがhorizonの内側で発生
+                if label[j] == 0:
+                    # 後のsignalがNsignal
+                    pass
+                elif label[i]*label[j] > 0:
+                    # 後のsignalが同一方向
+                    # => 後のsignalをNラベルに書き換える
+                    # => (extendの場合 現在のsignalの有効期限を後のsignalのものに引き延ばす)
+                    label[j] = 0
+                    t1[i] = t1[j]
+                    n_duplicates[i] += 1  # 重複数を確認しておく
+                elif label[i]*label[j] < 0:
+                    # 後に発生したsignalが逆側 => ここで打ち止め
+                    t1[i] = t0[j]
+                    break
+
+    return label, t0, t1, n_duplicates
+
+
+def getUniqueSignal(signal_df):
+    """ 重複するsignalを除き, 一番最初のsignalのみ残す.
+    Args:
+        signal_df (pd.DataFrame): [label, t0, t1]のdf. labelはU,N,D.
+        expiration_seconds (bool): signalの賞味期限[sec].
+    Returns:
+        uniq_signal (pd.DataFrame): 
+    """
+    assert isinstance(signal_df, pd.DataFrame)
+    label_col = signal_df.columns[signal_df.columns.str.contains("label")]
+    assert label_col.shape[0]==1, "signal_df dataframe have multiple or no label in column."
+
+    label_name = label_col[0]
+    _label = np.argmax(get_und_dummies(signal_df[label_name]).values, axis=1) - 1
+    _t0 = signal_df.t0.values.astype(float) /1e9
+    _t1 = signal_df.t1.values.astype(float) /1e9
+
+    _label, _t0, _t1, n_duplicates = __getUniqueSignal(_label, _t0, _t1)
+
+    _t0 = pd.to_datetime(_t0*1e9).round("ms")
+    _t1 = pd.to_datetime(_t1*1e9).round("ms")
+    uniq_signal = pd.DataFrame(
+        {"t0": _t0, "t1": _t1, label_name: _label, "duplicates": n_duplicates}
+    )
+    uniq_signal[label_name] = uniq_signal[f"{label_name}"].replace(-1,"D").replace(+1,"U").replace(0,"N")
+    return uniq_signal
+
+
+def to3classLabel(array_1d, threshold=[0, 0], isPercentage=False):
+    """ 1d-float -> 1d-UND
+    Args:
+        array_1d (pd.DataFrame): 予測値もしくはリターンの1d-array.
+        threshold (list of float): 
+    Returns:
+        (pd.DataFrame): 
+    """
+    assert hasattr(array_1d, "index"), "array_1d must be pd.Series or DataFrame."
+
+    if isPercentage:
+        if threshold[1]<1: warnings.warn(f"percentile threshold should be set within [0,100], not [0,1]")
+        _threshold = np.percentile(array_1d, q=threshold)
+        arr_labeled = array_1d\
+            .mask(array_1d<=_threshold[0], "D")\
+            .mask(array_1d>=_threshold[1], "U")\
+            .mask((_threshold[0]<array_1d)&(array_1d<_threshold[1]), "N")
+        return arr_labeled
+
+    else:
+        arr_labeled = array_1d\
+            .mask(array_1d<=threshold[0], "D")\
+            .mask(array_1d>=threshold[1], "U")\
+            .mask((threshold[0]<array_1d)&(array_1d<threshold[1]), "N")
+        return arr_labeled
+
+
+def fromPredToSignal(y_pred, threshold=None, isPercentage=False):
+    """ 3d-float -> 1d-UND
+    Args:
+        y_pred (np.ndarray): 3クラス分類器のoutput. shapeは[nsample, 3]で各要素は0<=elem<=1の値.
+        thredshold (float): signal発生閾値
+        isPercentileThreshold (bool): thresholdをpercentile(0<=.<=1)で渡すかどうか
+    Returns:
+        (np.ndarray): [0,1,0,1,2...]
+    """
+    assert isinstance(y_pred, np.ndarray)
+    assert y_pred.shape[1]==3
+
+    if isPercentage:
+        if threshold<1: warnings.warn(f"percentile threshold should be set within [0,100], not [0,1]")
+        prob = np.append(y_pred[:,0], y_pred[:,2])
+        val_threshold = np.percentile(prob, threshold)
+        return fromPredToSignal(y_pred, val_threshold, isPercentage=False)
+
+    else:
+        if threshold is None:
+            # 閾値なしの場合は最大のclassを出力する
+            signal = np.argmax(y_pred, axis=1).astype(object)
+            signal[signal==0] = "D"
+            signal[signal==1] = "N"
+            signal[signal==2] = "U"
+            return signal
+        else:
+            # (3値分類のみ正常) 閾値ありの場合,閾値を超えたクラスのうち最大のものをPositiveとする
+            signal_D = ((y_pred[:,0] > threshold) & (y_pred[:,0] > y_pred[:,2])).reshape(-1, 1)
+            signal_U = ((y_pred[:,2] > threshold) & (y_pred[:,2] > y_pred[:,0])).reshape(-1, 1)
+            signal_N = ((y_pred[:,0] <= threshold) & (y_pred[:,2] <= threshold)).reshape(-1, 1)
+            signal = 1 * np.concatenate([signal_D, signal_N, signal_U], axis=1)
+            signal = np.argmax(signal, axis=1).astype(object)
+            signal[signal==0] = "D"
+            signal[signal==1] = "N"
+            signal[signal==2] = "U"
+            return signal

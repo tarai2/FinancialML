@@ -10,7 +10,7 @@ def neutralizeSeries(target, by, proportion=1.0):
         by (pd.Series): 直交化の際の横軸
         proportion (float, optional): 直交化の強さ. Defaults to 1.0.
     Returns:
-        [pd.Series]: 直交化された系列
+        pd.Series: 直交化された系列
     """
     scores = target.values.reshape(-1, 1)
     factor = by.values.reshape(-1, 1)
@@ -33,9 +33,26 @@ def applyRankGauss(target):
     Args:
         target (pd.Series):
     Returns:
-        [pd.Series]:
+        pd.Series:
     """
     ranking = target.rank()
     ranking_pm1 = 2 * (ranking / (ranking.max()+1) - 0.5)
     rankgaussed_series = erfinv(ranking_pm1)
     return rankgaussed_series
+
+
+def applyBasedRankGauss(target, base=0, method="min"):
+    """ 特徴量target(離散,連続)をrankgauss化. baseの値を正規化後の0と一致させる.
+    Args:
+        target (pd.Series):
+    Returns:
+        pd.Series:
+    """
+    indicator_U = (target>base)
+    indicator_D = (target<base)
+    indicator_N = (target == base)
+    target[indicator_U] = +target[indicator_U].rank() / (indicator_U.sum()+1)
+    target[indicator_D] = -target[indicator_D].rank() / (indicator_D.sum()+1)
+    target[indicator_N] = 0.
+    rankgaussed = erfinv(target)
+    return rankgaussed
