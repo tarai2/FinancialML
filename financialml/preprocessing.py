@@ -28,6 +28,26 @@ def neutralizeSeries(target, by, proportion=1.0):
     return neutralized_target
 
 
+def neutralize(target, by, proportion=1.0):
+    """ 線形回帰成分を控除してtargetをbyに対して直交化する
+    Args:
+        target (pd.Series): 直交化対象の系列
+        by (pd.DataFrame): 直交化の際の横軸
+        proportion (float, optional): 直交化の強さ. Defaults to 1.0.
+    Returns:
+        pd.Series: 直交化された系列
+    """
+    factors = by.values
+    # constant column to make sure the series is completely neutral to exposures
+    factors = np.hstack(
+        (factors,
+         np.asarray(np.mean(target)) * np.ones(len(factors)).reshape(-1, 1))
+    )
+
+    scores = target - proportion * factors.dot(np.linalg.pinv(factors).dot(target.values))
+    return scores / scores.std()
+
+
 def applyRankGauss(target):
     """ 特徴量target(離散,連続)をrankgauss化
     Args:
